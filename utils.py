@@ -43,7 +43,7 @@ def fetch_content(url, responseTooLarge, summary=False):
 
 
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
-        driver.set_page_load_timeout(20)
+        driver.set_page_load_timeout(5)
 
         try:
             driver.get(url)
@@ -75,7 +75,7 @@ def process_results(results, responseTooLarge):
     # Initialize a ThreadPoolExecutor
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Create a future for each result
-        futures = {executor.submit(fetch_content, result.link, responseTooLarge, summary=False): result for result in formatted_results[:10]}
+        futures = {executor.submit(fetch_content, result.link, responseTooLarge, summary=False): result for result in formatted_results[:3]}
 
         for future in concurrent.futures.as_completed(futures):
             result = futures[future]
