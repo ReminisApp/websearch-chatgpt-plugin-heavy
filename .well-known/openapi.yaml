@@ -23,7 +23,7 @@ paths:
           example: python
         - name: responsetoolarge
           in: query
-          description: Increase if responseTooLarge occurs
+          description: Increase if ResponseTooLarge occurs should be equal and more than 1
           required: true
           schema:
             type: string
