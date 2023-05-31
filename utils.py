@@ -81,7 +81,7 @@ def process_results(results, responseTooLarge):
             result = futures[future]
             try:
                 result.full_content = future.result() or "Error fetching content"
-            except Exception as e:h
+            except Exception as e:
                 print(f"Error in fetch_content: {e}")
                 result.full_content = "Error fetching content"
 
