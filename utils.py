@@ -43,7 +43,7 @@ def fetch_content(url, responseTooLarge, summary=False):
 
 
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
-        driver.set_page_load_timeout(5)
+        driver.set_page_load_timeout(25)
 
         try:
             driver.get(url)
