@@ -30,62 +30,44 @@ def fetch_content(url, responseTooLarge, summary=False):
         if url.lower().endswith(('.pdf', '.doc', '.ppt')):
             print(f"Error fetching content: {e}")
             return None
-        response = requests.get(url, timeout=7)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            text = ' '.join(soup.stripped_strings)
-            words = text.split()
-            fall = 2000/responseTooLarge
-            if len(words) > fall:
-                words = words[:fall]
-                text = ' '.join(words)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
-            if summary:
-                return text[:fall] + '...'
-            else:
-                return text
-        else:
-            return None
-    except Exception as e:
+        # Use Selenium to fetch conten
+        options = Options()
+        options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+
+
+        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
+        driver.set_page_load_timeout(7)
+
         try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+            driver.get(url)
+            html_content = driver.page_source
+        except TimeoutException:
+            print("Timed out waiting for page to load")
+            html_content = "This url is giving page fetch timeout change the query."
+        finally:
+            driver.quit()
+        soup = BeautifulSoup(html_content, 'lxml')
+        text = ' '.join(soup.stripped_strings)
+        words = text.split()
+        fall = 2000/responseTooLarge
+        if len(words) > fall:
+            words = words[:fall]
+            text = ' '.join(words)
 
-            # Use Selenium to fetch conten
-            options = Options()
-            options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-            options.add_argument('--headless')
-            options.add_argument('--disable-gpu')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-
-
-            driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
-            driver.set_page_load_timeout(7)
-            
-            try:
-                driver.get(url)
-                html_content = driver.page_source
-            except TimeoutException:
-                print("Timed out waiting for page to load")
-                html_content = "This url is giving page fetch timeout change the query."
-            finally:
-                driver.quit()
-            soup = BeautifulSoup(html_content, 'lxml')
-            text = ' '.join(soup.stripped_strings)
-            words = text.split()
-            fall = 2000/responseTooLarge
-            if len(words) > fall:
-                words = words[:fall]
-                text = ' '.join(words)
-
-            if summary:
-                return text[:fall] + '...'
-            else:
-                return text
-        except Exception as e:
-            print(f"Error fetching content: {e}")
-            return None
+        if summary:
+            return text[:fall] + '...'
+        else:
+            return text
+    except Exception as e:
+        print(f"Error fetching content: {e}")
+        return None
 
 def process_results(results, responseTooLarge):
     formatted_results = [SearchResult(res['title'], res['link']) for res in results]
